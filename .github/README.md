@@ -16,7 +16,7 @@ model = load_my_model().eval().to(device)
 prior = torch.randint(0, vocab_size, (batch_size, 1)).to(device)
 
 # Generating the watermarked text
-watermarked = generate(model, prior, max_lenght=200, watermarked=True, gamma=0.5, delta=2)
+watermarked = generate(model, prior, max_length=200, watermarked=True, gamma=0.5, delta=2)
 ```
 
 Verfiying if a text was watermarked can be done as follows:
