@@ -29,7 +29,7 @@ detect_watermark(text, vocabulary_size, gamma=0.5)
 ```
 
 
-For more information, refer to [this example](./../main.py).
+For more information, refer to [this example](./../src/main.py).
 
 
 ## License

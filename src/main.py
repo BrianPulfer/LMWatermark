@@ -34,6 +34,7 @@ class GPT2Wrapper(torch.nn.Module):
 
 
 def main():
+    """Plots the perplexity of the GPT2 model and the z-static for sentences generated with and without watermarking."""
     # Device
     device = Accelerator().device
     
