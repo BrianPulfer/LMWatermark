@@ -33,13 +33,16 @@ class GPT2Wrapper(torch.nn.Module):
 
 
 def main():
+    # Device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     # Language Model (GPT2)
-    model = GPT2Wrapper()
+    model = GPT2Wrapper().to(device)
     vocab_size = model.tokenizer.vocab_size
 
     # Prior text
     prior = model.tokenizer("Some text to be continued",
-                            return_tensors="pt")["input_ids"]
+                            return_tensors="pt")["input_ids"].to(device)
 
     # A sentence generated without watermarking
     normal_ids = generate(model, prior, max_length=200, watermark=False)

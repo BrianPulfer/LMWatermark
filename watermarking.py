@@ -78,6 +78,7 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
         The z-statistic of the watermarking probability.
     """
     B, T = ids.shape
+    ids = ids.cpu()
     gls = int(gamma * vocab_size)  # Green list size
     in_green_list = torch.zeros(B, dtype=torch.float32)
 
