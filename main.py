@@ -1,5 +1,6 @@
 import torch
 from evaluate import load
+from accelerate import Accelerator
 from transformers import AutoTokenizer, GPT2LMHeadModel
 
 from watermarking import generate, detect_watermark
@@ -34,7 +35,7 @@ class GPT2Wrapper(torch.nn.Module):
 
 def main():
     # Device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = Accelerator().device
     
     # Language Model (GPT2)
     model = GPT2Wrapper().to(device)
