@@ -86,7 +86,9 @@ def main():
     plt.title("Perplexity vs Z-score")
     plt.xlabel("Perplexity")
     plt.ylabel("Z-score")
+    plt.savefig("perplexity_vs_zscore.png")
     plt.show()
+    print("Program completed successfully!")
 
 
 if __name__ == "__main__":
