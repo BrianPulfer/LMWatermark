@@ -25,7 +25,10 @@ Verfiying if a text was watermarked can be done as follows:
 from watermarking import detect_watermark
 
 # Text is a (B, T) tensor of idxs
-detect_watermark(text, vocabulary_size, gamma=0.5)
+z_score = detect_watermark(text, vocabulary_size, gamma=0.5)
+
+if (z_score >= 4):
+    print("Test has been AI-generated.")
 ```
 
 
