@@ -28,7 +28,7 @@ from watermarking import detect_watermark
 z_score = detect_watermark(text, vocabulary_size, gamma=0.5)
 
 if (z_score >= threshold):
-    print("Test has been AI-generated.")
+    print("Text has been AI-generated.")
 ```
 
 
