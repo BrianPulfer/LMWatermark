@@ -50,7 +50,7 @@ def generate(model, prior_tokens, max_length=200, watermark=True, gamma=0.5, del
 
             # Increasing probability of green list indices
             vs = l_t.shape[-1]  # Vocabulary size
-            gls = int(gamma * l_t.shape[-1])  # Green list size
+            gls = int(gamma * vs)  # Green list size
             gli = torch.stack([torch.randperm(vs, generator=generators[i])[:gls]
                                for i in range(B)])  # Green list indices
 
@@ -80,7 +80,7 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
     B, T = ids.shape
     ids = ids.cpu()
     gls = int(gamma * vocab_size)  # Green list size
-    in_green_list = torch.zeros(B, dtype=torch.float32)
+    in_green_list = torch.zeros(B, dtype=torch.float32) # Number of tokens in the green list
 
     for i in range(T-1):
         # Seeding generators based on previous token
