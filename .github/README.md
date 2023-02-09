@@ -27,7 +27,7 @@ from watermarking import detect_watermark
 # Text is a (B, T) tensor of idxs
 z_score = detect_watermark(text, vocabulary_size, gamma=0.5)
 
-if (z_score >= 4):
+if (z_score >= threshold):
     print("Test has been AI-generated.")
 ```
 
