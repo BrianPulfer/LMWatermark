@@ -31,6 +31,15 @@ if (z_score >= threshold):
     print("Text has been AI-generated.")
 ```
 
+Optionally, you can check a model's own perplexity of its generated text as follows:
+
+```python
+from watermarking import get_perplexities
+
+n_perplexities = get_perplexities(model, normal_text)
+w_perplexities = get_perplexities(model, watermarked_text)
+```
+
 
 For more information, refer to [this example](./../src/main.py).
 
