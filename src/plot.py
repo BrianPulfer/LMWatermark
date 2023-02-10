@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size for the generation")
     parser.add_argument("--delta", type=float, default=0.5, help="Green list proportion")
     parser.add_argument("--gamma", type=float, default=2, help="Red list proportion")
+    parser.add_argument("--device", type=int, default=0, help="Device to use for generation")
     
     return vars(parser.parse_args())
 
@@ -30,7 +31,7 @@ def get_gpt2_perplexities(model, ids):
         model: The model to use for calculating perplexity.
         tensor: The tensor with the generated text indices.
     """
-    perplexity = load("perplexity", module_type="metric")
+    perplexity = load("perplexity", module_type="metric", device=model.device)
     predictions = [model.tokenizer.decode(sentence)
                    for sentence in ids]
     return perplexity.compute(predictions=predictions, model_id='gpt2')["perplexities"]
@@ -49,9 +50,6 @@ class GPT2Wrapper(torch.nn.Module):
 
 
 def main():
-    # Device
-    device = Accelerator().device
-    
     # Plotting parameters
     args = parse_args()
     n_sentences = args["n_sentences"]
@@ -59,6 +57,9 @@ def main():
     batch_size = args["batch_size"]
     gamma = args["gamma"]
     delta = args["delta"]
+    
+    # Device
+    device = torch.device("cuda:" + str(args["device"]) if torch.cuda.is_available() else "cpu")
     
     # Model
     model = GPT2Wrapper().to(device)
