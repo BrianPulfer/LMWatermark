@@ -24,14 +24,14 @@ def parse_args():
     return vars(parser.parse_args())
 
 @torch.no_grad()
-def get_gpt2_perplexities(model, ids):
+def get_gpt2_perplexities(model, ids, device):
     """Returns the perplexity of the GPT2 model for the given tensor of indices.
 
     Args:
         model: The model to use for calculating perplexity.
         tensor: The tensor with the generated text indices.
     """
-    perplexity = load("perplexity", module_type="metric", device=model.device)
+    perplexity = load("perplexity", module_type="metric", device=device)
     predictions = [model.tokenizer.decode(sentence)
                    for sentence in ids]
     return perplexity.compute(predictions=predictions, model_id='gpt2')["perplexities"]
@@ -76,12 +76,12 @@ def main():
         
         # Regular sentences
         regular = generate(model, batch, max_length=seq_len, watermark=False)
-        regular_ppls.extend(get_gpt2_perplexities(model, regular))
+        regular_ppls.extend(get_gpt2_perplexities(model, regular, device))
         regular_z_scores.extend(detect_watermark(regular, vocab_size).tolist())
         
         # Watermarked sentences
         watermarked = generate(model, batch, max_length=seq_len, watermark=True, gamma=gamma, delta=delta)
-        watermarked_ppls.extend(get_gpt2_perplexities(model, watermarked))
+        watermarked_ppls.extend(get_gpt2_perplexities(model, watermarked, device))
         watermarked_z_scores.extend(detect_watermark(watermarked, vocab_size).tolist())
     
     # Scatter plot of perplexity vs z-score
