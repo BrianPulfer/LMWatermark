@@ -84,14 +84,14 @@ def main():
         watermarked_z_scores.extend(detect_watermark(watermarked, vocab_size).tolist())
     
     # Scatter plot of perplexity vs z-score
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(10, 10))
     plt.scatter(regular_ppls, regular_z_scores, label="Regular")
     plt.scatter(watermarked_ppls, watermarked_z_scores, label="Watermarked")
     plt.legend()
     plt.title("Perplexity vs Z-score")
     plt.xlabel("Perplexity")
     plt.ylabel("Z-score")
-    plt.savefig("perplexity_vs_zscore.png")
+    plt.savefig(f"perplexity_vs_zscore_(n={n_sentences}, seq_len={seq_len}, gamma={gamma}, delta={delta}).png")
     plt.show()
     print("Program completed successfully!")
 
