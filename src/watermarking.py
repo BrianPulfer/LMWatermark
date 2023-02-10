@@ -36,6 +36,7 @@ def generate(model, prior_tokens, max_length=200, watermark=True, gamma=0.5, del
         The generated text of shape (B, T).
     """
     B, T = prior_tokens.shape
+    device = prior_tokens.device
 
     generated_tokens = prior_tokens
     for _ in range(max_length - T):
@@ -45,17 +46,16 @@ def generate(model, prior_tokens, max_length=200, watermark=True, gamma=0.5, del
         if watermark:
             # Seeding generators based on previous token
             seeds = [hash_function(generated_tokens[i, -1]) for i in range(B)]
-            generators = [torch.Generator().manual_seed(seed)
+            generators = [torch.Generator(device=device).manual_seed(seed)
                           for seed in seeds]
 
             # Increasing probability of green list indices
             vs = l_t.shape[-1]  # Vocabulary size
             gls = int(gamma * vs)  # Green list size
-            gli = torch.stack([torch.randperm(vs, generator=generators[i])[:gls]
+            gli = torch.stack([torch.randperm(vs, generator=generators[i], device=device)
                                for i in range(B)])  # Green list indices
-
-            for i in range(B):
-                l_t[i, gli[i]] = l_t[i, gli[i]] + delta
+            
+            l_t = l_t + delta * (gli < gls)
 
         # Sampling from the distribution
         l_t = torch.softmax(l_t, dim=-1)
@@ -88,11 +88,11 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
         generators = [torch.Generator(device=device).manual_seed(seed) for seed in seeds]
 
         # Increasing probability of green list indices
-        gli = torch.stack([torch.randperm(vocab_size, generator=generators[i], device=device)[:gls]
+        gli = torch.stack([torch.randperm(vocab_size, generator=generators[i], device=device)
                            for i in range(B)])  # Green list indices
 
         # Counting tokens that are in the green list and adding to the total
-        in_green_list += (gli == ids[:, i+1].unsqueeze(-1)).any(dim=1)
+        in_green_list += (gli[:, ids[:, i+1]] < gls).squeeze(-1)
         
     z = (in_green_list - gamma * T) / np.sqrt(T*gamma*(1-gamma))
     return z
