@@ -92,7 +92,7 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
                            for i in range(B)])  # Green list indices
 
         # Counting tokens that are in the green list and adding to the total
-        in_green_list += (gli[:, ids[:, i+1]] < gls).squeeze(-1)
+        in_green_list += (gli.gather(1, ids[:, i+1].unsqueeze(-1)) < gls).squeeze()
         
     z = (in_green_list - gamma * T) / np.sqrt(T*gamma*(1-gamma))
     return z
