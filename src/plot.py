@@ -17,8 +17,8 @@ def parse_args():
     parser.add_argument("--n_sentences", type=int, default=128, help="Number of sentences to generate")
     parser.add_argument("--seq_len", type=int, default=200, help="Length of the generated sentences")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size for the generation")
-    parser.add_argument("--delta", type=float, default=0.5, help="Green list proportion")
-    parser.add_argument("--gamma", type=float, default=2, help="Red list proportion")
+    parser.add_argument("--gamma", type=float, default=0.5, help="Green list proportion")
+    parser.add_argument("--delta", type=float, default=2, help="Amount to add to the logits of the model when watermarking")
     parser.add_argument("--device", type=int, default=0, help="Device to use for generation")
     
     return vars(parser.parse_args())
