@@ -97,3 +97,18 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
         
     z = (in_green_list - gamma * T) / np.sqrt(T*gamma*(1-gamma))
     return z
+
+@torch.no_grad()
+def get_perplexities(model, ids):
+    """Returns the perplexities of the given texts."""
+    B, T = ids.shape
+    
+    perplexities = torch.zeros(B)
+    for i in range(T-1):
+        l_t = model(ids[:, :i+1])[:, -1, :]
+        l_t = torch.softmax(l_t, dim=-1)
+        l_t = l_t[range(B), ids[:, i+1]]
+        l_t = torch.log(l_t)
+        perplexities += l_t
+    
+    return torch.exp(-perplexities / (T-1))

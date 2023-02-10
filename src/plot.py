@@ -1,8 +1,6 @@
-from watermarking import detect_watermark, generate
+from watermarking import detect_watermark, generate, get_perplexities
 from argparse import ArgumentParser
 import torch
-from evaluate import load
-from accelerate import Accelerator
 from transformers import AutoTokenizer, GPT2LMHeadModel
 
 from tqdm import tqdm
@@ -27,23 +25,6 @@ def parse_args():
                         help="Device to use for generation")
 
     return vars(parser.parse_args())
-
-
-@torch.no_grad()
-def get_gpt2_perplexities(model, ids):
-    """Returns the perplexity of the GPT2 model for the given tensor of indices.
-
-    Args:
-        model: The model to use for calculating perplexity.
-        tensor: The tensor with the generated text indices.
-    """
-    perplexity = load("perplexity", module_type="metric")
-    predictions = [model.tokenizer.decode(sentence)
-                   for sentence in ids]
-    return perplexity.compute(
-        predictions=predictions,
-        model_id='gpt2',
-        device="cuda" if torch.cuda.is_available() else "cpu")["perplexities"]
 
 
 class GPT2Wrapper(torch.nn.Module):
@@ -88,13 +69,13 @@ def main():
 
         # Regular sentences
         regular = generate(model, batch, max_length=seq_len, watermark=False)
-        regular_ppls.extend(get_gpt2_perplexities(model, regular))
+        regular_ppls.extend(get_perplexities(model, regular).tolist())
         regular_z_scores.extend(detect_watermark(regular, vocab_size).tolist())
 
         # Watermarked sentences
         watermarked = generate(
             model, batch, max_length=seq_len, watermark=True, gamma=gamma, delta=delta)
-        watermarked_ppls.extend(get_gpt2_perplexities(model, watermarked))
+        watermarked_ppls.extend(get_perplexities(model, watermarked).tolist())
         watermarked_z_scores.extend(
             detect_watermark(watermarked, vocab_size).tolist())
 

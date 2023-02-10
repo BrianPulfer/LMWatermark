@@ -3,22 +3,7 @@ from evaluate import load
 from accelerate import Accelerator
 from transformers import AutoTokenizer, GPT2LMHeadModel
 
-from watermarking import generate, detect_watermark
-
-
-@torch.no_grad()
-def get_gpt2_perplexity(model, ids):
-    """Returns the perplexity of the GPT2 model for the given tensor of indices.
-
-    Args:
-        model: The model to use for calculating perplexity.
-        tensor: The tensor with the generated text indices.
-    """
-    perplexity = load("perplexity", module_type="metric")
-    predictions = [model.tokenizer.decode(sentence)
-                   for sentence in ids]
-    return perplexity.compute(predictions=predictions, model_id='gpt2', device="cuda" if torch.cuda.is_available() else "cpu")["mean_perplexity"]
-
+from watermarking import generate, detect_watermark, get_perplexities
 
 class GPT2Wrapper(torch.nn.Module):
     """A wrapper around the GPT2 model to take ids as input and return logits as output."""
@@ -48,22 +33,22 @@ def main():
 
     # A sentence generated without watermarking
     normal_ids = generate(model, prior, max_length=200, watermark=False)
-    n_ppl = get_gpt2_perplexity(model, normal_ids)    # Perplexity
-    n_z = detect_watermark(normal_ids, vocab_size)  # Z-statistic
+    n_ppl = get_perplexities(model, normal_ids).item()    # Perplexity
+    n_z = detect_watermark(normal_ids, vocab_size).item()  # Z-statistic
 
     # A sentence generated with watermarking
     watermarked_ids = generate(model, prior, max_length=200, watermark=True)
-    w_ppl = get_gpt2_perplexity(model, watermarked_ids)    # Perplexity
-    w_z = detect_watermark(watermarked_ids, vocab_size)  # Z-statistic
+    w_ppl = get_perplexities(model, watermarked_ids).item()    # Perplexity
+    w_z = detect_watermark(watermarked_ids, vocab_size).item()  # Z-statistic
 
     # Showing non-watermarked text, PPL and probability of watermark
     print(
-        f"\n\n\033[92mNormal text (PPL = {n_ppl:.2f}, Z-statistic = {n_z})\033[0m:\n")
+        f"\n\n\033[92mNormal text (PPL = {n_ppl:.2f}, Z-statistic = {n_z:.2f})\033[0m:\n")
     print(model.tokenizer.decode(normal_ids[0]))
 
     # Showing watermarked text, PPL and probability of watermark
     print(
-        f"\n\n\033[93mWM text (PPL = {w_ppl:.2f}, Z-statistic = {w_z})\033[0m:\n")
+        f"\n\n\033[93mWM text (PPL = {w_ppl:.2f}, Z-statistic = {w_z:.2f})\033[0m:\n")
     print(model.tokenizer.decode(watermarked_ids[0]))
 
 
