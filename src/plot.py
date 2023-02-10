@@ -17,6 +17,8 @@ def parse_args():
     parser.add_argument("--n_sentences", type=int, default=128, help="Number of sentences to generate")
     parser.add_argument("--seq_len", type=int, default=200, help="Length of the generated sentences")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size for the generation")
+    parser.add_argument("--delta", type=float, default=0.5, help="Green list proportion")
+    parser.add_argument("--gamma", type=float, default=2, help="Red list proportion")
     
     return vars(parser.parse_args())
 
@@ -55,6 +57,8 @@ def main():
     n_sentences = args["n_sentences"]
     seq_len = args["seq_len"]
     batch_size = args["batch_size"]
+    gamma = args["gamma"]
+    delta = args["delta"]
     
     # Model
     model = GPT2Wrapper().to(device)
@@ -75,11 +79,12 @@ def main():
         regular_z_scores.extend(detect_watermark(regular, vocab_size).tolist())
         
         # Watermarked sentences
-        watermarked = generate(model, batch, max_length=seq_len, watermark=True, gamma=0.1, delta=5)
+        watermarked = generate(model, batch, max_length=seq_len, watermark=True, gamma=gamma, delta=delta)
         watermarked_ppls.extend(get_gpt2_perplexities(model, watermarked))
         watermarked_z_scores.extend(detect_watermark(watermarked, vocab_size).tolist())
     
     # Scatter plot of perplexity vs z-score
+    plt.figure(figsize=(20, 20))
     plt.scatter(regular_ppls, regular_z_scores, label="Regular")
     plt.scatter(watermarked_ppls, watermarked_z_scores, label="Watermarked")
     plt.legend()
