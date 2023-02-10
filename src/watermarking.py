@@ -103,7 +103,7 @@ def get_perplexities(model, ids):
     """Returns the perplexities of the given texts."""
     B, T = ids.shape
     
-    perplexities = torch.zeros(B)
+    perplexities = torch.zeros(B).to(ids.device)
     for i in range(T-1):
         l_t = model(ids[:, :i+1])[:, -1, :]
         l_t = torch.softmax(l_t, dim=-1)
