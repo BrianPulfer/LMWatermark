@@ -17,7 +17,7 @@ def get_gpt2_perplexity(model, ids):
     perplexity = load("perplexity", module_type="metric")
     predictions = [model.tokenizer.decode(sentence)
                    for sentence in ids]
-    return perplexity.compute(predictions=predictions, model_id='gpt2')["mean_perplexity"]
+    return perplexity.compute(predictions=predictions, model_id='gpt2', device="cuda" if torch.cuda.is_available() else "cpu")["mean_perplexity"]
 
 
 class GPT2Wrapper(torch.nn.Module):
@@ -37,7 +37,7 @@ def main():
     """Plots the perplexity of the GPT2 model and the z-static for sentences generated with and without watermarking."""
     # Device
     device = Accelerator().device
-    
+
     # Language Model (GPT2)
     model = GPT2Wrapper().to(device)
     vocab_size = model.tokenizer.vocab_size
@@ -57,11 +57,13 @@ def main():
     w_z = detect_watermark(watermarked_ids, vocab_size)  # Z-statistic
 
     # Showing non-watermarked text, PPL and probability of watermark
-    print(f"\n\n\033[92mNormal text (PPL = {n_ppl:.2f}, Z-statistic = {n_z})\033[0m:\n")
+    print(
+        f"\n\n\033[92mNormal text (PPL = {n_ppl:.2f}, Z-statistic = {n_z})\033[0m:\n")
     print(model.tokenizer.decode(normal_ids[0]))
 
     # Showing watermarked text, PPL and probability of watermark
-    print(f"\n\n\033[93mWM text (PPL = {w_ppl:.2f}, Z-statistic = {w_z})\033[0m:\n")
+    print(
+        f"\n\n\033[93mWM text (PPL = {w_ppl:.2f}, Z-statistic = {w_z})\033[0m:\n")
     print(model.tokenizer.decode(watermarked_ids[0]))
 
 
