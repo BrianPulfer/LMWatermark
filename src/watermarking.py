@@ -35,10 +35,10 @@ def generate(model, prior_tokens, max_length=200, watermark=True, gamma=0.5, del
     Returns:
         The generated text of shape (B, T).
     """
-    B = prior_tokens.shape[0]
+    B, T = prior_tokens.shape
 
     generated_tokens = prior_tokens
-    for _ in range(max_length):
+    for _ in range(max_length - T):
         # Getting logits
         l_t = model(generated_tokens)[:, -1, :]
 
