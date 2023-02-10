@@ -78,22 +78,21 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
         The z-statistic of the watermarking probability.
     """
     B, T = ids.shape
-    ids = ids.cpu()
+    device = ids.device
     gls = int(gamma * vocab_size)  # Green list size
-    in_green_list = torch.zeros(B, dtype=torch.float32) # Number of tokens in the green list
+    in_green_list = torch.zeros(B, dtype=torch.float32).to(device) # Number of tokens in the green list
 
     for i in range(T-1):
         # Seeding generators based on previous token
         seeds = [hash_function(ids[j, i]) for j in range(B)]
-        generators = [torch.Generator().manual_seed(seed) for seed in seeds]
+        generators = [torch.Generator(device=device).manual_seed(seed) for seed in seeds]
 
         # Increasing probability of green list indices
-        gli = torch.stack([torch.randperm(vocab_size, generator=generators[i])[:gls]
+        gli = torch.stack([torch.randperm(vocab_size, generator=generators[i], device=device)[:gls]
                            for i in range(B)])  # Green list indices
 
         # Counting tokens that are in the green list and adding to the total
-        in_green_list += torch.tensor([ids[sequence, i+1] in gli[sequence]
-                                      for sequence in range(B)]).int()
+        in_green_list += (gli == ids[:, i+1].unsqueeze(-1)).any(dim=1)
         
     z = (in_green_list - gamma * T) / np.sqrt(T*gamma*(1-gamma))
     return z
