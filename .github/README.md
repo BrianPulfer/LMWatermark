@@ -1,7 +1,7 @@
 # Watermarking for language models
 ## Description
-Implementation of the watermarking technique proposed in [*A Watermark for Large Language Models*](https://arxiv.org/abs/2301.10226v2)
-by **Kirchenbauer** & **Geiping** et. al.
+Re-implementation of the watermarking technique proposed in [*A Watermark for Large Language Models*](https://arxiv.org/abs/2301.10226v2)
+by **Kirchenbauer** & **Geiping** et. al. ([Original repo](https://github.com/jwkirchenbauer/lm-watermarking))
 
 ## Usage
 Generating a (soft) watermarked text with your language model is as easy as:
