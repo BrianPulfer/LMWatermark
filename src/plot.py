@@ -1,11 +1,12 @@
-from watermarking import detect_watermark, generate, get_perplexities
-from argparse import ArgumentParser
-import torch
-from transformers import AutoTokenizer, GPT2LMHeadModel
-
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 22})
+from argparse import ArgumentParser
+
+import torch
+from transformers import AutoTokenizer, GPT2LMHeadModel, set_seed
+
+from watermarking import detect_watermark, generate, get_perplexities
 
 
 def parse_args():
@@ -23,6 +24,7 @@ def parse_args():
                         help="Amount to add to the logits of the model when watermarking")
     parser.add_argument("--device", type=int, default=0,
                         help="Device to use for generation")
+    parser.add_argument("--seed", type=int, default=0, help="Seed for the generation")
 
     return vars(parser.parse_args())
 
@@ -48,6 +50,10 @@ def main():
     batch_size = args["batch_size"]
     gamma = args["gamma"]
     delta = args["delta"]
+    seed = args["seed"]
+    
+    # Setting seed
+    set_seed(seed)
 
     # Device
     device = torch.device(
@@ -88,7 +94,7 @@ def main():
     plt.xlabel("Perplexity")
     plt.ylabel("Z-score")
     plt.savefig(
-        f"perplexity_vs_zscore_(n={n_sentences}, seq_len={seq_len}, gamma={gamma}, delta={delta}).png")
+        f"perplexity_vs_zscore_(n={n_sentences}, seq_len={seq_len}, gamma={gamma}, delta={delta}, seed={seed}).png")
     plt.show()
     print("Program completed successfully!")
 

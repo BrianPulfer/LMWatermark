@@ -1,7 +1,6 @@
 import torch
-from evaluate import load
 from accelerate import Accelerator
-from transformers import AutoTokenizer, GPT2LMHeadModel
+from transformers import AutoTokenizer, GPT2LMHeadModel, set_seed
 
 from watermarking import generate, detect_watermark, get_perplexities
 
@@ -20,6 +19,9 @@ class GPT2Wrapper(torch.nn.Module):
 
 def main():
     """Plots the perplexity of the GPT2 model and the z-static for sentences generated with and without watermarking."""
+    # Setting seed
+    set_seed(0)
+    
     # Device
     device = Accelerator().device
 
