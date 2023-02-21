@@ -7,9 +7,10 @@ by Kirchenbauer, Geiping et. al. (https://arxiv.org/abs/2301.10226v2).
 import torch
 import numpy as np
 
+from hashlib import sha256
 
 def default_hash_fn(tensor):
-    """Returns the hash of the given tensor by converting it to a string first.
+    """Returns the hash of the given tensor using the sha256 algorithm and by converting the tensor to a string first.
 
     Args:
         tensor: The tensor to hash.
@@ -17,7 +18,7 @@ def default_hash_fn(tensor):
     Returns:
         The hash of the tensor.
     """
-    return hash(str(tensor))
+    return int(sha256(str(tensor).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
 
 
 @torch.no_grad()
@@ -99,7 +100,15 @@ def detect_watermark(ids, vocab_size, gamma=0.5, hash_function=default_hash_fn):
 
 @torch.no_grad()
 def get_perplexities(model, ids):
-    """Returns the perplexities of the given texts."""
+    """Returns the perplexities of the model for the given texts.
+    
+    Args:
+        model: The model which outputs logits for the next token.
+        ids: The tensor with the generated text indices of shape (B, T)
+    
+    Returns:
+        The perplexities of the model for the given texts as a tensor of shape (B,).
+    """
     B, T = ids.shape
     
     perplexities = torch.zeros(B).to(ids.device)
